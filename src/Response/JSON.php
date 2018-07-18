@@ -13,6 +13,7 @@ class JSON extends Model
      *
      * @return $this
      * @throws \TeamWorkPm\Exception
+     * @throws \ErrorException
      */
     public function parse($data, array $headers)
     {
@@ -20,31 +21,24 @@ class JSON extends Model
         $errors = $this->getJsonErrors();
         $this->string = $data;
         if (!$errors) {
-            if (!(
-                $headers['Status'] === 201 ||
-                $headers['Status'] === 200 ||
-                $headers['Status'] === 409 ||
-                $headers['Status'] === 422
-            )) {
-                print_r($headers);
-                exit;
+            if ((int)$headers['Status'] <= 200 || (int)$headers['Status'] >= 300) {
+                throw new \ErrorException('Response with error status code - ' . $headers['Status']);
             }
             if ($headers['Status'] === 201 || $headers['Status'] === 200) {
                 switch ($headers['Method']) {
                     case 'UPLOAD':
                         return empty($source->pendingFile->ref) ? null :
-                                            (string) $source->pendingFile->ref;
+                            (string)$source->pendingFile->ref;
                     case 'POST':
-                        // print_r($headers);
                         if (!empty($headers['id'])) {
-                            return (int) $headers['id'];
+                            return (int)$headers['id'];
                         } elseif (!empty($source->fileId)) {
-                            return (int) $source->fileId;
+                            return (int)$source->fileId;
                         }
-                        // no break
+                    // no break
                     case 'PUT':
                     case 'DELETE':
-                         return true;
+                        return true;
 
                     default:
                         if (!empty($source->STATUS)) {
@@ -63,7 +57,7 @@ class JSON extends Model
                                 $headers['X-Action']
                             )
                         ) {
-                                $source = current($source->messageReplies);
+                            $source = current($source->messageReplies);
                         } elseif (
                             !empty($source->people) &&
                             preg_match(
@@ -84,7 +78,7 @@ class JSON extends Model
                             $source = current($source);
                         }
                         if ($headers['X-Action'] === 'links' ||
-                                        $headers['X-Action'] === 'notebooks') {
+                            $headers['X-Action'] === 'notebooks') {
                             $_source = [];
                             $wrapper = $headers['X-Action'];
                             foreach ($source as $project) {
@@ -102,10 +96,10 @@ class JSON extends Model
                         $this->headers = $headers;
                         $this->string = json_encode($source);
 
-                        $this->data   = self::camelizeObject($source);
+                        $this->data = self::camelizeObject($source);
 
                         if (!empty($this->data->id)) {
-                            $this->data->id = (int) $this->data->id;
+                            $this->data->id = (int)$this->data->id;
                         }
 
                         return $this;
@@ -118,9 +112,9 @@ class JSON extends Model
         }
 
         throw new Exception([
-            'Message'  => $errors,
+            'Message' => $errors,
             'Response' => $data,
-            'Headers'  => $headers
+            'Headers' => $headers
         ]);
     }
 
@@ -140,7 +134,7 @@ class JSON extends Model
             }
             $key = Str::camel($key);
             $destination->$key = is_scalar($value) ?
-                                        $value : self::camelizeObject($value);
+                $value : self::camelizeObject($value);
         }
         return $destination;
     }
@@ -162,19 +156,19 @@ class JSON extends Model
         switch ($errorCode) {
             case JSON_ERROR_DEPTH:
                 return 'Maximum stack depth exceeded';
-            break;
+                break;
             case JSON_ERROR_STATE_MISMATCH:
                 return 'Underflow or the modes mismatch';
-            break;
+                break;
             case JSON_ERROR_CTRL_CHAR:
                 return 'Unexpected control character found';
-            break;
+                break;
             case JSON_ERROR_SYNTAX:
                 return 'Syntax error, malformed JSON';
-            break;
+                break;
             case JSON_ERROR_UTF8:
                 return 'Malformed UTF-8 characters, possibly incorrectly encoded';
-            break;
+                break;
         }
     }
 }

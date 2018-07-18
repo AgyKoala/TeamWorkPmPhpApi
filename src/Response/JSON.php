@@ -21,7 +21,7 @@ class JSON extends Model
         $errors = $this->getJsonErrors();
         $this->string = $data;
         if (!$errors) {
-            if ((int)$headers['Status'] <= 200 || (int)$headers['Status'] >= 300) {
+            if ((int)$headers['Status'] < 200 || (int)$headers['Status'] >= 300) {
                 throw new \ErrorException('Response with error status code - ' . $headers['Status']);
             }
             if ($headers['Status'] === 201 || $headers['Status'] === 200) {

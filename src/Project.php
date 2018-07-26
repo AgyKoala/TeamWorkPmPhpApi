@@ -6,44 +6,44 @@ class Project extends Model
     {
         $this->fields = [
             // New Project Name
-            'name'        => true,
+            'name' => true,
             // [Optional. Project Description]
-            'description' =>  false,
+            'description' => false,
             // [Optional. Start date in yyyymmdd format]
-            'startDate'  => [
-                'required'=> false,
+            'startDate' => [
+                'required' => false,
                 'attributes' => [
-                    'type'=>'integer'
+                    'type' => 'integer'
                 ]
             ],
             // [Optional. End date in yyyymmdd format]
-            'endDate'    => [
+            'endDate' => [
                 'required' => false,
                 'attributes' => [
-                    'type'=>'integer'
+                    'type' => 'integer'
                 ]
             ],
             // [Optional. Id of company to assign the project to]
-            'companyId'  => [
+            'companyId' => [
                 'required' => false,
                 'attributes' => [
                     'type' => 'integer'
                 ]
             ],
             // [Optional. Name of a new company to assign the project to]
-            'newCompany'    => false,
+            'newCompany' => false,
             //[Optional. Numeric ID of project category, 0 = no category]
-            'category-id'     => false,
+            'category-id' => false,
             // [Optional. Comma separated list of tags to apply to project]
-            'tags'            => false,
+            'tags' => false,
 
             'notifyeveryone' => [
                 'required' => false,
                 'attributes' => [
-                    'type'=>'boolean'
+                    'type' => 'boolean'
                 ]
             ],
-            'status'         => false
+            'status' => false
         ];
     }
 
@@ -67,12 +67,39 @@ class Project extends Model
     /**
      * @param array $params
      *
-     * @return \TeamWorkPm\Response\Model
-     * @throws \TeamWorkPm\Exception
+     * @return array
+     * @throws Exception
      */
     public function getActive(array $params = [])
     {
-        return $this->getByStatus('active', $params);
+        $projects = $this->getByStatus('active', $params);
+        foreach ($projects as $project) {
+            if ($project->subStatus == 'completed') {
+                continue;
+            }
+            $activeProjects[] = $project;
+        }
+
+        return $activeProjects ?? [];
+    }
+
+    /**
+     * @param array $params
+     *
+     * @return array
+     * @throws Exception
+     */
+    public function getCompleted(array $params = [])
+    {
+        $projects = $this->getByStatus('active', $params);
+        foreach ($projects as $project) {
+            if ($project->subStatus != 'completed') {
+                continue;
+            }
+            $activeProjects[] = $project;
+        }
+
+        return $activeProjects ?? [];
     }
 
     /**
@@ -96,7 +123,7 @@ class Project extends Model
      */
     private function getByStatus($status, $params)
     {
-        $params = (array) $params;
+        $params = (array)$params;
         $params['status'] = strtoupper($status);
         return $this->rest->get("$this->action", $params);
     }
@@ -122,7 +149,7 @@ class Project extends Model
      */
     public function star($id)
     {
-        $id = (int) $id;
+        $id = (int)$id;
         if ($id <= 0) {
             throw new Exception('Invalid param id');
         }
@@ -139,7 +166,7 @@ class Project extends Model
      */
     public function unStar($id)
     {
-        $id = (int) $id;
+        $id = (int)$id;
         if ($id <= 0) {
             throw new \TeamWorkPm\Exception('Invalid param id');
         }
@@ -156,7 +183,7 @@ class Project extends Model
      */
     public function activate($id)
     {
-        $id = (int) $id;
+        $id = (int)$id;
         if ($id <= 0) {
             throw new Exception('Invalid param id');
         }
@@ -176,7 +203,7 @@ class Project extends Model
      */
     public function archive($id)
     {
-        $id = (int) $id;
+        $id = (int)$id;
         if ($id <= 0) {
             throw new Exception('Invalid param id');
         }

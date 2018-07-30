@@ -13,7 +13,7 @@ class JSON extends Model
      *
      * @return $this
      * @throws \TeamWorkPm\Exception
-     * @throws \ErrorException
+     * @throws \Exception
      */
     public function parse($data, array $headers)
     {
@@ -22,7 +22,7 @@ class JSON extends Model
         $this->string = $data;
         if (!$errors) {
             if ((int)$headers['Status'] < 200 || (int)$headers['Status'] >= 300) {
-                throw new \ErrorException('Response with error status code - ' . $headers['Status']);
+                throw new Exception('Response with error status code - ' . $headers['Status']);
             }
             if ($headers['Status'] === 201 || $headers['Status'] === 200) {
                 switch ($headers['Method']) {

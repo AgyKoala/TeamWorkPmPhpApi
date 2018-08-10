@@ -96,21 +96,25 @@ class Project extends Model
             if ($project->subStatus != 'completed') {
                 continue;
             }
-            $activeProjects[] = $project;
+            $completedProjects[] = $project;
         }
 
-        return $activeProjects ?? [];
+        return $completedProjects ?? [];
     }
 
     /**
      * @param array $params
      *
-     * @return \TeamWorkPm\Response\Model
-     * @throws \TeamWorkPm\Exception
+     * @return array
+     * @throws Exception
      */
     public function getArchived(array $params = [])
     {
-        return $this->getByStatus('archived', $params);
+        $projects = $this->getByStatus('archived', $params);
+        foreach ($projects as $project) {
+            $archivedProjects[] = $project;
+        }
+        return $archivedProjects ?? [];
     }
 
     /**

@@ -133,6 +133,16 @@ class Project extends Model
     }
 
     /**
+     * @param int $id
+     * @return Response\Model
+     * @throws Exception
+     */
+    public function getProjectById(int $id)
+    {
+        return $this->rest->get("$this->action/$id");
+    }
+
+    /**
      * Surprisingly, this will retrieve all of your projects, which have been starred!
      *
      * @return \TeamWorkPm\Response\Model
